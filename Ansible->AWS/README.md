@@ -1,4 +1,4 @@
-[200~# AWS Infrastructure Automation with Ansible
+# AWS Infrastructure Automation with Ansible
 This project provides a streamlined workflow for provisioning and managing AWS resources (such as EC2 instances) using Ansible. By leveraging Ansible Vault for secret management and the amazon.aws collection, you can securely automate your cloud infrastructure.
 
 ## Prerequisites
@@ -93,8 +93,8 @@ Bash
 ansible-playbook ec2_create.yml --vault-password-file .vault_pass
 ```
 #### Security Reminders
-#### - Gitignore: Always include .vault_pass and any unencrypted .yml files in your .gitignore.
+- Gitignore: Always include .vault_pass and any unencrypted .yml files in your .gitignore.
 
-#### - Rotate Keys: Regularly rotate your AWS IAM keys to minimize impact in case of a leak.
+- Rotate Keys: Regularly rotate your AWS IAM keys to minimize impact in case of a leak.
 
-#### - IAM Roles: For production environments running on EC2, consider using IAM Roles instead of static Access Keys for even better security.
+- IAM Roles: For production environments running on EC2, consider using IAM Roles instead of static Access Keys for even better security.
