@@ -57,6 +57,18 @@ Bash
 ansible-vault create group_vars/all/pass.yml --vault-password-file .vault_pass
 ```
 
+```ansible-vault create```: This tells Ansible to initialize a new file that will be encrypted from the start.
+
+```group_vars/all/pass.yml```: This is the file being created.
+
+```group_vars/all/```: is a standard directory structure in Ansible where variables valid for all hosts are stored.
+
+```pass.yml```: is the specific file where you will likely type your secrets.
+
+```--vault-password-file .vault_pass```: This is the crucial part for automation/convenience.
+
+Instead of asking you to type a password interactively to encrypt the file, Ansible reads the encryption key from a plain text file named .vault_pass located in your current directory.
+
 #### Inside pass.yml, define your variables:
 ```
 YAML
@@ -92,6 +104,7 @@ Bash
 
 ansible-playbook ec2_create.yml --vault-password-file .vault_pass
 ```
+
 #### Security Reminders
 - Gitignore: Always include .vault_pass and any unencrypted .yml files in your .gitignore.
 
