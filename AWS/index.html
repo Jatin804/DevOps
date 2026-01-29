@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Mastery Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --card-bg: #1a1d29;
+            --text-main: #e0e6ed;
+            --text-muted: #94a3b8;
+            --accent-color: #FF9900; /* AWS Orange */
+            --accent-glow: rgba(255, 153, 0, 0.3);
+            --success-color: #10b981;
+            --font-stack: 'Inter', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        /* --- Header & Progress --- */
+        header {
+            padding: 4rem 2rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .intro-text {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.05);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin: 2rem auto;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            position: relative;
+        }
+
+        .progress-text {
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            font-family: monospace;
+        }
+
+        /* --- Grid Layout --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- Category Sections --- */
+        .category-section {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            opacity: 0; /* Hidden initially for GSAP */
+            transform: translateY(30px);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* --- Service Cards --- */
+        .service-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .service-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px -10px var(--accent-glow);
+        }
+
+        .service-card.learned {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
+        }
+
+        .service-card.learned .service-name {
+            color: var(--success-color);
+        }
+
+        .service-card.learned::after {
+            content: '✓';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .service-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .service-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* GUI Container override */
+        .lil-gui { 
+            --background-color: #1a1d29;
+            --text-color: #e0e6ed;
+            --title-background-color: #FF9900;
+            --widget-color: #333;
+            --hover-color: #444;
+            --focus-color: #555;
+            --number-color: #2cc9ff;
+            --string-color: #a2ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AWS Learning Path</h1>
+        <p class="intro-text">
+            Track your journey through the Amazon Web Services ecosystem. <br>
+            Click a card to mark it as <strong>Mastered</strong>.
+        </p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">0% Completed</div>
+    </header>
+
+    <main class="grid-container" id="app">
+        </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.0/dist/lil-gui.umd.min.js"></script>
+
+    <script>
+        // --- 1. Data Source ---
+        const awsData = [
+            {
+                category: "Compute Services",
+                icon: "🖥️",
+                description: "Foundational infrastructure to run applications.",
+                services: [
+                    { name: "EC2", desc: "Scalable virtual servers in the cloud." },
+                    { name: "Lambda", desc: "Serverless computing that scales automatically." },
+                    { name: "Elastic Beanstalk", desc: "Easy deployment for web apps." },
+                    { name: "Lightsail", desc: "Simplified VPS, storage, and networking." },
+                    { name: "Batch", desc: "Run batch computing jobs at any scale." },
+                    { name: "Outposts", desc: "Run AWS infrastructure on-premises." }
+                ]
+            },
+            {
+                category: "Storage Services",
+                icon: "🗄️",
+                description: "Reliable and scalable storage solutions.",
+                services: [
+                    { name: "S3", desc: "Object storage for backup and analytics." },
+                    { name: "EFS", desc: "Managed, scalable file storage." },
+                    { name: "FSx", desc: "High-performance file systems (Windows/Lustre)." },
+                    { name: "Glacier", desc: "Low-cost archival for infrequent access." },
+                    { name: "Storage Gateway", desc: "Hybrid cloud storage integration." }
+                ]
+            },
+            {
+                category: "Database Services",
+                icon: "📊",
+                description: "Managed relational and NoSQL databases.",
+                services: [
+                    { name: "RDS", desc: "Managed MySQL, PostgreSQL, Oracle, etc." },
+                    { name: "DynamoDB", desc: "Fast, flexible NoSQL database." },
+                    { name: "Redshift", desc: "Data warehousing for big data analytics." },
+                    { name: "ElastiCache", desc: "In-memory caching (Redis/Memcached)." },
+                    { name: "Neptune", desc: "Fully-managed graph database." }
+                ]
+            },
+            {
+                category: "Networking",
+                icon: "🌐",
+                description: "Networking and content delivery.",
+                services: [
+                    { name: "VPC", desc: "Isolated networks for AWS resources." },
+                    { name: "Route 53", desc: "Scalable DNS web service." },
+                    { name: "CloudFront", desc: "Global Content Delivery Network (CDN)." },
+                    { name: "API Gateway", desc: "Create and secure APIs at scale." },
+                    { name: "Direct Connect", desc: "Dedicated network connection to AWS." }
+                ]
+            },
+            {
+                category: "Security & Identity",
+                icon: "🔐",
+                description: "Safeguard applications and data.",
+                services: [
+                    { name: "IAM", desc: "Control user access and encryption keys." },
+                    { name: "KMS", desc: "Managed encryption service." },
+                    { name: "Inspector", desc: "Automated security assessment." },
+                    { name: "Macie", desc: "ML-powered sensitive data protection." },
+                    { name: "GuardDuty", desc: "Threat detection monitoring." }
+                ]
+            },
+            {
+                category: "Analytics",
+                icon: "📈",
+                description: "Extract insights from data.",
+                services: [
+                    { name: "Athena", desc: "Query S3 data using SQL." },
+                    { name: "EMR", desc: "Big data processing (Hadoop/Spark)." },
+                    { name: "Kinesis", desc: "Real-time data streaming." },
+                    { name: "QuickSight", desc: "Business intelligence service." },
+                    { name: "Glue", desc: "Managed ETL service." }
+                ]
+            },
+            {
+                category: "Machine Learning",
+                icon: "🤖",
+                description: "Integrate AI/ML into projects.",
+                services: [
+                    { name: "SageMaker", desc: "Build, train, and deploy ML models." },
+                    { name: "Rekognition", desc: "Image/video analysis." },
+                    { name: "Lex", desc: "Conversational interfaces (Voice/Text)." },
+                    { name: "Polly", desc: "Natural-sounding text-to-speech." },
+                    { name: "Comprehend", desc: "NLP for text analysis." }
+                ]
+            },
+            {
+                category: "Migration",
+                icon: "🚛",
+                description: "Move systems and data to the cloud.",
+                services: [
+                    { name: "DMS", desc: "Database migration service." },
+                    { name: "Snowball", desc: "Physical data transport devices." },
+                    { name: "Transfer Family", desc: "Secure file transfer (SFTP/FTP)." }
+                ]
+            },
+            {
+                category: "Developer Tools",
+                icon: "👨‍💻",
+                description: "Streamline development processes.",
+                services: [
+                    { name: "CodeCommit", desc: "Managed source control." },
+                    { name: "CodeBuild", desc: "Build and test code." },
+                    { name: "CodeDeploy", desc: "Automate software deployments." },
+                    { name: "CodePipeline", desc: "CI/CD service." }
+                ]
+            },
+            {
+                category: "Management",
+                icon: "📋",
+                description: "Monitor and control environments.",
+                services: [
+                    { name: "CloudWatch", desc: "Monitoring for resources/apps." },
+                    { name: "CloudTrail", desc: "Log user actions and API calls." },
+                    { name: "Config", desc: "Track resource configurations." },
+                    { name: "Trusted Advisor", desc: "Optimization and security advice." }
+                ]
+            },
+            {
+                category: "Cost Management",
+                icon: "💰",
+                description: "Track and optimize spending.",
+                services: [
+                    { name: "Cost Explorer", desc: "Visualize AWS costs." },
+                    { name: "Budgets", desc: "Set custom budgets and alerts." },
+                    { name: "Savings Plans", desc: "Flexible pricing models." }
+                ]
+            }
+        ];
+
+        // State Management
+        let learnedServices = JSON.parse(localStorage.getItem('awsLearned')) || [];
+        
+        // Count total services for progress calculation
+        const totalServices = awsData.reduce((acc, cat) => acc + cat.services.length, 0);
+
+        // --- 2. Render Logic ---
+        const app = document.getElementById('app');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        function render() {
+            app.innerHTML = '';
+            
+            awsData.forEach((category, catIndex) => {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                
+                let servicesHtml = '';
+                category.services.forEach((service) => {
+                    const isLearned = learnedServices.includes(service.name);
+                    servicesHtml += `
+                        <div class="service-card ${isLearned ? 'learned' : ''}" 
+                             onclick="toggleService('${service.name}', this)">
+                            <div class="service-name">${service.name}</div>
+                            <div class="service-desc">${service.desc}</div>
+                        </div>
+                    `;
+                });
+
+                section.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon">${category.icon}</span>
+                        <div>
+                            <div class="category-title">${category.category}</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">${category.description}</div>
+                        </div>
+                    </div>
+                    <div class="service-list">
+                        ${servicesHtml}
+                    </div>
+                `;
+                app.appendChild(section);
+            });
+
+            updateProgress();
+        }
+
+        // --- 3. Interaction Logic ---
+        window.toggleService = function(name, element) {
+            if (learnedServices.includes(name)) {
+                learnedServices = learnedServices.filter(item => item !== name);
+                element.classList.remove('learned');
+                // GSAP Jiggle for removal
+                gsap.to(element, { x: 0, duration: 0.1, clearProps: "x" });
+            } else {
+                learnedServices.push(name);
+                element.classList.add('learned');
+                // GSAP Pop for success
+                gsap.fromTo(element, 
+                    { scale: 1 }, 
+                    { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1 }
+                );
+            }
+            
+            localStorage.setItem('awsLearned', JSON.stringify(learnedServices));
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const percentage = Math.round((learnedServices.length / totalServices) * 100);
+            
+            // GSAP Animation for progress bar
+            gsap.to(progressBar, { 
+                width: `${percentage}%`, 
+                duration: 1, 
+                ease: "elastic.out(1, 0.5)" 
+            });
+            
+            // Text count animation
+            progressText.innerText = `${percentage}% Mastery (${learnedServices.length}/${totalServices})`;
+        }
+
+        // --- 4. Initialization & Animation ---
+        render();
+
+        // Staggered Entrance Animation
+        gsap.to(".category-section", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+
+        // --- 5. GUI Library (Lil-GUI) ---
+        const params = {
+            accentColor: '#FF9900',
+            glowIntensity: 0.3,
+            resetProgress: () => {
+                if(confirm("Reset all progress?")) {
+                    learnedServices = [];
+                    localStorage.setItem('awsLearned', JSON.stringify([]));
+                    render();
+                    gsap.fromTo(".service-card", {opacity: 0}, {opacity: 1, duration: 0.5, stagger: 0.01});
+                }
+            }
+        };
+
+        const gui = new lil.GUI({ title: 'Tracker Settings' });
+        
+        gui.addColor(params, 'accentColor')
+           .name('Theme Color')
+           .onChange(value => {
+               document.documentElement.style.setProperty('--accent-color', value);
+               // Also update the glow based on the new color
+               document.documentElement.style.setProperty('--accent-glow', `rgba(${hexToRgb(value)}, ${params.glowIntensity})`);
+           });
+
+        gui.add(params, 'glowIntensity', 0, 1)
+           .name('Glow Power')
+           .onChange(value => {
+               const color = document.documentElement.style.getPropertyValue('--accent-color');
+               document.documentElement.style.setProperty('--accent-glow', `rgba(${hexToRgb(color)}, ${value})`);
+           });
+           
+        gui.add(params, 'resetProgress').name('⚠ Reset Data');
+
+        // Helper for GUI color handling
+        function hexToRgb(hex) {
+            // Remove hash if present
+            hex = hex.replace('#', '');
+            
+            // Parse r, g, b
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            return `${r}, ${g}, ${b}`;
+        }
+    </script>
+</body>
+</html>
