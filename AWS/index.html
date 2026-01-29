@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Mastery Tracker</title>
+    <title>AWS SAA-C03 Exam Tracker</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.css" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0f111a;
             --card-bg: #1a1d29;
+            --card-hover: #232736;
             --text-main: #e0e6ed;
             --text-muted: #94a3b8;
-            --accent-color: #FF9900; /* AWS Orange */
-            --accent-glow: rgba(255, 153, 0, 0.3);
+            --accent-color: #FF9900;
+            --core-color: #F59E0B;
+            --medium-color: #3B82F6;
+            --awareness-color: #64748B;
             --success-color: #10b981;
+            --danger-color: #ef4444;
             --font-stack: 'Inter', system-ui, sans-serif;
         }
 
@@ -24,461 +28,737 @@
             color: var(--text-main);
             font-family: var(--font-stack);
             overflow-x: hidden;
-            transition: background-color 0.5s ease;
+            padding-bottom: 5rem;
         }
 
-        /* --- Header & Progress --- */
+        /* --- Header --- */
         header {
-            padding: 4rem 2rem;
-            text-align: center;
-            max-width: 800px;
+            padding: 4rem 2rem 2rem;
+            max-width: 900px;
             margin: 0 auto;
-            position: relative;
-            z-index: 10;
+            text-align: center;
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 800;
-            letter-spacing: -0.05em;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, #fff 0%, var(--accent-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .intro-text {
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.1);
             color: var(--text-muted);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 3rem;
         }
 
-        .progress-container {
-            background: rgba(255,255,255,0.05);
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            margin: 2rem auto;
+        /* --- Progress Bar --- */
+        .progress-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 17, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .progress-track {
+            width: 100%;
             max-width: 600px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
         }
 
-        .progress-bar {
+        .progress-fill {
             height: 100%;
             width: 0%;
-            background: var(--accent-color);
-            box-shadow: 0 0 15px var(--accent-color);
-            position: relative;
+            background: linear-gradient(90deg, var(--accent-color), #fcd34d);
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
         }
 
-        .progress-text {
-            margin-top: 0.5rem;
-            font-weight: 600;
-            color: var(--accent-color);
+        .progress-stats {
             font-family: monospace;
+            font-weight: 700;
+            white-space: nowrap;
+            min-width: 180px;
+            text-align: right;
         }
 
-        /* --- Grid Layout --- */
-        .grid-container {
+        /* --- Main Content --- */
+        .category-container {
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+        }
+
+        .patterns-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
         }
 
-        /* --- Category Sections --- */
-        .category-section {
-            background: rgba(255,255,255,0.02);
+        .pattern-card {
+            background: linear-gradient(145deg, #1e2230, #161822);
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 2rem;
-            opacity: 0; /* Hidden initially for GSAP */
-            transform: translateY(30px);
-        }
-
-        .category-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 1rem;
-        }
-
-        .category-icon {
-            font-size: 2rem;
-            margin-right: 1rem;
+            padding: 1.5rem;
+            border-radius: 16px;
         }
 
         .category-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-        }
-
-        /* --- Service Cards --- */
-        .service-list {
-            display: grid;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
             gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* --- Service Card --- */
         .service-card {
             background: var(--card-bg);
-            padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid transparent;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
             cursor: pointer;
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .service-card:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
         }
 
         .service-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
+            background: var(--card-hover);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .service-card.expanded {
+            grid-column: 1 / -1;
+            background: #1e2230;
             border-color: var(--accent-color);
-            box-shadow: 0 10px 30px -10px var(--accent-glow);
+            cursor: default;
         }
 
-        .service-card.learned {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--success-color);
-        }
+        .service-card.expanded:hover { transform: none; }
 
-        .service-card.learned .service-name {
-            color: var(--success-color);
-        }
-
-        .service-card.learned::after {
-            content: '✓';
+        .card-status-bar {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--success-color);
-            font-weight: bold;
-            font-size: 1.2rem;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: transparent;
+            transition: background 0.3s;
+        }
+
+        .service-card.learned .card-status-bar { background: var(--success-color); }
+        .service-card.learned { border-color: rgba(16, 185, 129, 0.3); }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+            padding-left: 10px;
         }
 
         .service-name {
             font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
             color: #fff;
         }
 
-        .service-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.4;
+        .exam-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        /* GUI Container override */
-        .lil-gui { 
-            --background-color: #1a1d29;
-            --text-color: #e0e6ed;
-            --title-background-color: #FF9900;
-            --widget-color: #333;
-            --hover-color: #444;
-            --focus-color: #555;
-            --number-color: #2cc9ff;
-            --string-color: #a2ff00;
+        .badge-core { border: 1px solid var(--core-color); color: var(--core-color); background: rgba(245, 158, 11, 0.1); }
+        .badge-medium { border: 1px solid var(--medium-color); color: var(--medium-color); background: rgba(59, 130, 246, 0.1); }
+        .badge-awareness { border: 1px solid var(--awareness-color); color: var(--awareness-color); background: rgba(100, 116, 139, 0.1); }
+
+        .service-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            padding-left: 10px;
         }
+
+        /* --- Expanded Content --- */
+        .expanded-content {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-left: 10px;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-text {
+            color: #d1d5db;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .trap-row .detail-label { color: var(--danger-color); }
+        .trap-row .detail-text { color: #fca5a5; }
+
+        .master-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .master-btn:hover, .master-btn:focus-visible {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
+        }
+
+        .service-card.learned .master-btn {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: #0f111a;
+        }
+
+        .lil-gui { --background-color: #1a1d29; --text-color: #e0e6ed; --title-background-color: #FF9900; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>AWS Learning Path</h1>
-        <p class="intro-text">
-            Track your journey through the Amazon Web Services ecosystem. <br>
-            Click a card to mark it as <strong>Mastered</strong>.
-        </p>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
+        <div class="header-meta">
+            <span class="meta-tag">Exam: SAA-C03</span>
+            <span class="meta-tag">Updated: 2026</span>
+            <span class="meta-tag" style="border-color: var(--core-color); color: var(--core-color)">🔥 Very High Priority</span>
         </div>
-        <div class="progress-text" id="progressText">0% Completed</div>
+        <h1>AWS Solutions Architect</h1>
     </header>
 
-    <main class="grid-container" id="app">
-        </main>
+    <div class="progress-wrapper">
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div class="progress-stats" id="progressText">0% Readiness</div>
+    </div>
+
+    <div class="category-container">
+        <div class="patterns-grid">
+            <div class="pattern-card">
+                <h3 style="color:var(--accent-color); margin-bottom:0.5rem">🏗️ Decoupled & Stateless</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted)">Scale components independently (SQS). Store session state in DynamoDB/ElastiCache, not on the instance.</p>
+            </div>
+            <div class="pattern-card">
+                <h3 style="color:var(--accent-color); margin-bottom:0.5rem">⚡ Event-Driven</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted)">S3 Upload → EventBridge → Lambda → SNS. React to changes instantly without polling.</p>
+            </div>
+            <div class="pattern-card">
+                <h3 style="color:var(--accent-color); margin-bottom:0.5rem">🛡️ Multi-AZ Fault Tolerance</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted)">Always assume failure. Deploy across at least 2 AZs. Use Auto Scaling and Elastic Load Balancing.</p>
+            </div>
+        </div>
+    </div>
+
+    <main id="app"></main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.0/dist/lil-gui.umd.min.js"></script>
 
     <script>
-        // --- 1. Data Source ---
+        gsap.registerPlugin(Flip);
+
+        // --- 1. NEW SYLLABUS DATA ---
+        // Weights: core (Very High), medium (High), awareness (Medium)
         const awsData = [
             {
-                category: "Compute Services",
-                icon: "🖥️",
-                description: "Foundational infrastructure to run applications.",
+                title: "1. Compute & Scaling 🔥",
                 services: [
-                    { name: "EC2", desc: "Scalable virtual servers in the cloud." },
-                    { name: "Lambda", desc: "Serverless computing that scales automatically." },
-                    { name: "Elastic Beanstalk", desc: "Easy deployment for web apps." },
-                    { name: "Lightsail", desc: "Simplified VPS, storage, and networking." },
-                    { name: "Batch", desc: "Run batch computing jobs at any scale." },
-                    { name: "Outposts", desc: "Run AWS infrastructure on-premises." }
+                    { 
+                        id: "ec2", name: "EC2 Core", weight: "core",
+                        desc: "Virtual servers. Know families, placement, and boot logic.",
+                        useCase: "Long-running workloads, legacy apps.",
+                        notes: "• Families: General, Compute (C), Memory (R), Storage (I/D)<br>• User Data: Scripts run on first boot only.<br>• Placement Groups: Cluster (Speed), Spread (Safety), Partition (Hadoop).<br>• ENI vs Instance Store (Ephemeral/Fast) vs EBS (Persistent).",
+                        trap: "Scaling EC2 manually instead of using ASG."
+                    },
+                    { 
+                        id: "asg", name: "Auto Scaling (ASG)", weight: "core",
+                        desc: "Scale capacity based on demand.",
+                        useCase: "Stateless web apps, handling traffic spikes.",
+                        notes: "• Target Tracking: 'Keep CPU at 50%'.<br>• Step Scaling: 'Add 2 if CPU > 80%'.<br>• Health Checks: EC2 (Hardware) vs ELB (Application).<br>• Scale-in protection: Don't kill busy instances.",
+                        trap: "Thinking ASG is just for growth; it's also for self-healing (replacing bad nodes)."
+                    },
+                    { 
+                        id: "elb", name: "Elastic Load Balancer", weight: "core",
+                        desc: "Traffic distribution.",
+                        useCase: "Single entry point for apps.",
+                        notes: "• ALB (L7): Path-based routing, Sticky Sessions (Cookies), Containers.<br>• NLB (L4): Millions of requests/sec, Static IP, TCP/UDP.<br>• GWLB: For 3rd party firewalls.",
+                        trap: "Using ALB for TCP/UDP traffic (Must use NLB)."
+                    },
+                    { 
+                        id: "lambda", name: "Lambda", weight: "core",
+                        desc: "Serverless compute.",
+                        useCase: "Event-driven, <15 min jobs.",
+                        notes: "• Timeout: Max 15 mins.<br>• Concurrency: Reserved (Guaranteed) vs Provisioned (No Cold Starts).<br>• Event Sources: S3, API Gateway, SQS.",
+                        trap: "Running >15 min workloads (Use ECS/Batch instead)."
+                    }
                 ]
             },
             {
-                category: "Storage Services",
-                icon: "🗄️",
-                description: "Reliable and scalable storage solutions.",
+                title: "2. Storage 🔥",
                 services: [
-                    { name: "S3", desc: "Object storage for backup and analytics." },
-                    { name: "EFS", desc: "Managed, scalable file storage." },
-                    { name: "FSx", desc: "High-performance file systems (Windows/Lustre)." },
-                    { name: "Glacier", desc: "Low-cost archival for infrequent access." },
-                    { name: "Storage Gateway", desc: "Hybrid cloud storage integration." }
+                    { 
+                        id: "s3", name: "S3", weight: "core",
+                        desc: "Object storage backbone.",
+                        useCase: "Static sites, Data Lakes, Backups.",
+                        notes: "• Classes: Standard, IA, One Zone-IA, Glacier (Retrieval times!), Deep Archive.<br>• Features: Lifecycle Rules, Versioning (Required for MFA Delete), Encryption (SSE-S3/KMS/C).",
+                        trap: "Using S3 for a file system (POSIX) - Use EFS."
+                    },
+                    { 
+                        id: "ebs", name: "EBS", weight: "core",
+                        desc: "Block storage for EC2.",
+                        useCase: "OS Drives, Databases on EC2.",
+                        notes: "• Types: gp3 (General), io2 (High Perf DB), st1/sc1 (HDD - Big Data).<br>• Snapshots: Incremental & Region-scoped.",
+                        trap: "Trying to attach one EBS to instances in different AZs (Impossible)."
+                    },
+                    { 
+                        id: "efs", name: "EFS", weight: "core",
+                        desc: "Managed NFS File System.",
+                        useCase: "Shared storage for Linux instances (Web servers, CMS).",
+                        notes: "• POSIX compliant.<br>• Mount targets in each AZ.<br>• Works with EC2, ECS, Lambda.",
+                        trap: "Using EFS for Windows (Use FSx for Windows)."
+                    },
+                    { 
+                        id: "fsx", name: "FSx", weight: "core",
+                        desc: "Specialized File Systems.",
+                        useCase: "Windows or High Performance Computing (HPC).",
+                        notes: "• FSx for Windows: SMB protocol, AD integration.<br>• FSx for Lustre: S3 integration, HPC.",
+                        trap: ""
+                    }
                 ]
             },
             {
-                category: "Database Services",
-                icon: "📊",
-                description: "Managed relational and NoSQL databases.",
+                title: "3. Databases 🔥",
                 services: [
-                    { name: "RDS", desc: "Managed MySQL, PostgreSQL, Oracle, etc." },
-                    { name: "DynamoDB", desc: "Fast, flexible NoSQL database." },
-                    { name: "Redshift", desc: "Data warehousing for big data analytics." },
-                    { name: "ElastiCache", desc: "In-memory caching (Redis/Memcached)." },
-                    { name: "Neptune", desc: "Fully-managed graph database." }
+                    { 
+                        id: "rds", name: "RDS", weight: "core",
+                        desc: "Managed Relational DB.",
+                        useCase: "Structured data, complex queries.",
+                        notes: "• Multi-AZ: Synchronous replication (Disaster Recovery).<br>• Read Replicas: Asynchronous (Performance scaling).<br>• Encryption: Must be done at creation.",
+                        trap: "Using Multi-AZ for performance (It's for DR). Use Read Replicas for performance."
+                    },
+                    { 
+                        id: "aurora", name: "Aurora", weight: "core",
+                        desc: "AWS-optimized Relational.",
+                        useCase: "Enterprise scale RDS.",
+                        notes: "• 1 Writer, up to 15 Readers.<br>• Serverless v2: Instant scaling.<br>• Auto-failover is faster than standard RDS.",
+                        trap: ""
+                    },
+                    { 
+                        id: "dynamo", name: "DynamoDB", weight: "core",
+                        desc: "NoSQL Key-Value.",
+                        useCase: "Massive scale, simple queries.",
+                        notes: "• Primary Key: Partition Key + (Optional) Sort Key.<br>• On-demand vs Provisioned (predictable load).<br>• DAX: In-memory cache for Dynamo.<br>• TTL: Auto-delete old items.",
+                        trap: "Using RDS for massive, flat data scale (Use DynamoDB)."
+                    },
+                    { 
+                        id: "elasticache", name: "ElastiCache", weight: "core",
+                        desc: "In-memory caching.",
+                        useCase: "Microsecond latency, DB offloading.",
+                        notes: "• Redis: Complex data, persistence, Multi-AZ.<br>• Memcached: Simple string cache, multi-thread.",
+                        trap: "Using Redis as a primary persistent database."
+                    }
                 ]
             },
             {
-                category: "Networking",
-                icon: "🌐",
-                description: "Networking and content delivery.",
+                title: "4. Networking 🔥",
                 services: [
-                    { name: "VPC", desc: "Isolated networks for AWS resources." },
-                    { name: "Route 53", desc: "Scalable DNS web service." },
-                    { name: "CloudFront", desc: "Global Content Delivery Network (CDN)." },
-                    { name: "API Gateway", desc: "Create and secure APIs at scale." },
-                    { name: "Direct Connect", desc: "Dedicated network connection to AWS." }
+                    { 
+                        id: "vpc", name: "VPC Core", weight: "core",
+                        desc: "Network isolation.",
+                        useCase: "Foundational network.",
+                        notes: "• Public Subnet: Has Route to IGW.<br>• Private Subnet: Route to NAT Gateway.<br>• NACL (Stateless/Subnet level) vs SG (Stateful/Instance level).",
+                        trap: "Thinking Security Groups are stateless (They are Stateful)."
+                    },
+                    { 
+                        id: "route53", name: "Route 53", weight: "core",
+                        desc: "DNS & Health Checks.",
+                        useCase: "Routing users to endpoints.",
+                        notes: "• Policies: Simple, Weighted (A/B testing), Latency (Performance), Failover (DR), Geolocation (Compliance).",
+                        trap: ""
+                    },
+                    { 
+                        id: "cloudfront", name: "CloudFront", weight: "core",
+                        desc: "CDN.",
+                        useCase: "Global caching for static AND dynamic content.",
+                        notes: "• Origins: S3, ALB, EC2.<br>• Signed URLs: Private content access.",
+                        trap: "Thinking CloudFront is only for static sites (It caches APIs too)."
+                    }
                 ]
             },
             {
-                category: "Security & Identity",
-                icon: "🔐",
-                description: "Safeguard applications and data.",
+                title: "5. Security & Identity 🔥",
                 services: [
-                    { name: "IAM", desc: "Control user access and encryption keys." },
-                    { name: "KMS", desc: "Managed encryption service." },
-                    { name: "Inspector", desc: "Automated security assessment." },
-                    { name: "Macie", desc: "ML-powered sensitive data protection." },
-                    { name: "GuardDuty", desc: "Threat detection monitoring." }
+                    { 
+                        id: "iam", name: "IAM", weight: "core",
+                        desc: "Access Control.",
+                        useCase: "Authentication & Authorization.",
+                        notes: "• Role: Temp access for EC2/Lambda/Cross-Account.<br>• Policy Logic: Explicit Deny > Explicit Allow > Implicit Deny.",
+                        trap: "Hardcoding credentials in code (Use Roles)."
+                    },
+                    { 
+                        id: "kms", name: "KMS", weight: "core",
+                        desc: "Encryption Keys.",
+                        useCase: "Managing encryption at rest.",
+                        notes: "• CMK (Customer Managed) vs AWS Managed.<br>• Key rotation.",
+                        trap: ""
+                    },
+                    { 
+                        id: "orgs", name: "Organizations", weight: "core",
+                        desc: "Multi-account management.",
+                        useCase: "Billing and Policies.",
+                        notes: "• SCP (Service Control Policy): Restrict permissions across accounts.",
+                        trap: "Bucket policy ignored? Check if SCP has an explicit deny."
+                    }
                 ]
             },
             {
-                category: "Analytics",
-                icon: "📈",
-                description: "Extract insights from data.",
+                title: "6. Application Integration (High)",
                 services: [
-                    { name: "Athena", desc: "Query S3 data using SQL." },
-                    { name: "EMR", desc: "Big data processing (Hadoop/Spark)." },
-                    { name: "Kinesis", desc: "Real-time data streaming." },
-                    { name: "QuickSight", desc: "Business intelligence service." },
-                    { name: "Glue", desc: "Managed ETL service." }
+                    { 
+                        id: "sqs", name: "SQS", weight: "medium",
+                        desc: "Message Queues.",
+                        useCase: "Decoupling and buffering.",
+                        notes: "• Standard: Unlimited throughput, best-effort ordering.<br>• FIFO: Strict ordering, exactly-once, limited throughput.<br>• Visibility Timeout: Hides message while processing.",
+                        trap: "Using SNS for buffering (SNS is push, SQS is poll/buffer)."
+                    },
+                    { 
+                        id: "sns", name: "SNS", weight: "medium",
+                        desc: "Pub/Sub Messaging.",
+                        useCase: "Fan-out architecture.",
+                        notes: "• Topic sends to SQS, Lambda, Email, SMS.",
+                        trap: ""
+                    },
+                    { 
+                        id: "step", name: "Step Functions", weight: "medium",
+                        desc: "Orchestration.",
+                        useCase: "Complex workflows with state.",
+                        notes: "• Handles retries, branches, parallel execution.",
+                        trap: "Chaining Lambdas directly (Anti-pattern: creates tight coupling)."
+                    }
                 ]
             },
             {
-                category: "Machine Learning",
-                icon: "🤖",
-                description: "Integrate AI/ML into projects.",
+                title: "7. Monitoring (High)",
                 services: [
-                    { name: "SageMaker", desc: "Build, train, and deploy ML models." },
-                    { name: "Rekognition", desc: "Image/video analysis." },
-                    { name: "Lex", desc: "Conversational interfaces (Voice/Text)." },
-                    { name: "Polly", desc: "Natural-sounding text-to-speech." },
-                    { name: "Comprehend", desc: "NLP for text analysis." }
+                    { 
+                        id: "cloudwatch", name: "CloudWatch", weight: "medium",
+                        desc: "Metrics & Logs.",
+                        useCase: "Performance monitoring.",
+                        notes: "• Metrics (CPU, Disk).<br>• Alarms (Trigger ASG).<br>• Logs (App output).",
+                        trap: "Thinking CloudWatch Logs are on by default for EC2 (Must install agent)."
+                    },
+                    { 
+                        id: "cloudtrail", name: "CloudTrail", weight: "medium",
+                        desc: "Auditing.",
+                        useCase: "Compliance and Security Analysis.",
+                        notes: "• Logs WHO did WHAT and WHEN (API calls).",
+                        trap: "Using CloudTrail for performance metrics (That's CloudWatch)."
+                    }
                 ]
             },
             {
-                category: "Migration",
-                icon: "🚛",
-                description: "Move systems and data to the cloud.",
+                title: "8. Migration & Hybrid (Medium)",
                 services: [
-                    { name: "DMS", desc: "Database migration service." },
-                    { name: "Snowball", desc: "Physical data transport devices." },
-                    { name: "Transfer Family", desc: "Secure file transfer (SFTP/FTP)." }
+                    { 
+                        id: "storagegw", name: "Storage Gateway", weight: "awareness",
+                        desc: "Hybrid Storage.",
+                        useCase: "On-prem extension.",
+                        notes: "• File Gateway (NFS/SMB to S3).<br>• Volume Gateway (iSCSI to EBS).<br>• Tape Gateway (VTL to Glacier)."
+                    },
+                    { 
+                        id: "dms", name: "DMS & DataSync", weight: "awareness",
+                        desc: "Data Transfer.",
+                        useCase: "Moving DBs or Files.",
+                        notes: "• DMS: Database migration (keep source running).<br>• DataSync: Fast file transfer (NAS to S3)."
+                    },
+                    { 
+                        id: "snow", name: "Snow Family", weight: "awareness",
+                        desc: "Offline Data Transfer.",
+                        useCase: "No internet/Low bandwidth.",
+                        notes: "• Snowcone (Small).<br>• Snowball Edge (TB scale + Compute).<br>• Snowmobile (Exabyte container)."
+                    }
                 ]
             },
             {
-                category: "Developer Tools",
-                icon: "👨‍💻",
-                description: "Streamline development processes.",
+                title: "9. Cost Management (Medium)",
                 services: [
-                    { name: "CodeCommit", desc: "Managed source control." },
-                    { name: "CodeBuild", desc: "Build and test code." },
-                    { name: "CodeDeploy", desc: "Automate software deployments." },
-                    { name: "CodePipeline", desc: "CI/CD service." }
+                    { 
+                        id: "cost", name: "Savings & RIs", weight: "awareness",
+                        desc: "Optimization.",
+                        useCase: "Saving money on long-term commitments.",
+                        notes: "• RIs: Specific instance types.<br>• Savings Plans: Flexible (Compute/EC2).<br>• Spot: Up to 90% off, but interruptible.",
+                        trap: "Using Spot for critical workloads without fallback."
+                    }
                 ]
             },
             {
-                category: "Management",
-                icon: "📋",
-                description: "Monitor and control environments.",
+                title: "10. Architecture Patterns 🔥",
                 services: [
-                    { name: "CloudWatch", desc: "Monitoring for resources/apps." },
-                    { name: "CloudTrail", desc: "Log user actions and API calls." },
-                    { name: "Config", desc: "Track resource configurations." },
-                    { name: "Trusted Advisor", desc: "Optimization and security advice." }
-                ]
-            },
-            {
-                category: "Cost Management",
-                icon: "💰",
-                description: "Track and optimize spending.",
-                services: [
-                    { name: "Cost Explorer", desc: "Visualize AWS costs." },
-                    { name: "Budgets", desc: "Set custom budgets and alerts." },
-                    { name: "Savings Plans", desc: "Flexible pricing models." }
+                    {
+                        id: "patterns", name: "Design Patterns", weight: "core",
+                        desc: "Exam Gold Concepts.",
+                        useCase: "How to think like an Architect.",
+                        notes: "1. Decouple everything (SQS).<br>2. Stateless apps (Scale easier).<br>3. Multi-AZ is non-negotiable.<br>4. Caching at every layer (CloudFront > ElastiCache > DAX).",
+                        trap: "Storing session data on the EC2 instance (User gets logged out if instance dies)."
+                    }
                 ]
             }
         ];
 
-        // State Management
-        let learnedServices = JSON.parse(localStorage.getItem('awsLearned')) || [];
-        
-        // Count total services for progress calculation
-        const totalServices = awsData.reduce((acc, cat) => acc + cat.services.length, 0);
+        const WEIGHTS = { core: 3, medium: 2, awareness: 1 };
 
-        // --- 2. Render Logic ---
+        // --- 2. STATE ---
+        let state = {
+            learned: new Set(JSON.parse(localStorage.getItem('aws_saa_updated_learned')) || [])
+        };
+
+        // --- 3. RENDER ---
         const app = document.getElementById('app');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
 
+        function getBadge(weight) {
+            const map = {
+                core: { cls: 'badge-core', txt: '🔥 Core' },
+                medium: { cls: 'badge-medium', txt: 'High Priority' },
+                awareness: { cls: 'badge-awareness', txt: 'Medium' }
+            };
+            return map[weight] || map.awareness;
+        }
+
         function render() {
             app.innerHTML = '';
             
-            awsData.forEach((category, catIndex) => {
-                const section = document.createElement('div');
-                section.className = 'category-section';
+            awsData.forEach(category => {
+                const section = document.createElement('section');
+                section.className = 'category-container';
                 
-                let servicesHtml = '';
-                category.services.forEach((service) => {
-                    const isLearned = learnedServices.includes(service.name);
-                    servicesHtml += `
-                        <div class="service-card ${isLearned ? 'learned' : ''}" 
-                             onclick="toggleService('${service.name}', this)">
-                            <div class="service-name">${service.name}</div>
-                            <div class="service-desc">${service.desc}</div>
+                const grid = document.createElement('div');
+                grid.className = 'services-grid';
+
+                category.services.forEach(service => {
+                    const badge = getBadge(service.weight);
+                    const isLearned = state.learned.has(service.id);
+                    
+                    const card = document.createElement('div');
+                    card.className = `service-card ${isLearned ? 'learned' : ''}`;
+                    card.setAttribute('data-id', service.id);
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('aria-expanded', 'false');
+
+                    card.innerHTML = `
+                        <div class="card-status-bar"></div>
+                        <div class="service-header">
+                            <span class="service-name">${service.name}</span>
+                            <span class="exam-badge ${badge.cls}">${badge.txt}</span>
+                        </div>
+                        <div class="service-desc">${service.desc}</div>
+                        
+                        <div class="expanded-content">
+                            <div class="detail-row">
+                                <span class="detail-label">Context</span>
+                                <span class="detail-text">${service.useCase}</span>
+                            </div>
+                            ${service.notes ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Key Concepts</span>
+                                <span class="detail-text">${service.notes}</span>
+                            </div>` : ''}
+                            ${service.trap ? `
+                            <div class="detail-row trap-row">
+                                <span class="detail-label">⚠️ Exam Trap</span>
+                                <span class="detail-text">${service.trap}</span>
+                            </div>` : ''}
+                            
+                            <button class="master-btn" data-action="toggle-mastery">
+                                ${isLearned ? '✓ Mastered' : 'Mark as Mastered'}
+                            </button>
                         </div>
                     `;
+                    grid.appendChild(card);
                 });
 
-                section.innerHTML = `
-                    <div class="category-header">
-                        <span class="category-icon">${category.icon}</span>
-                        <div>
-                            <div class="category-title">${category.category}</div>
-                            <div style="font-size:0.85rem; color:var(--text-muted);">${category.description}</div>
-                        </div>
-                    </div>
-                    <div class="service-list">
-                        ${servicesHtml}
-                    </div>
-                `;
+                section.innerHTML = `<h2 class="category-title">${category.title}</h2>`;
+                section.appendChild(grid);
                 app.appendChild(section);
             });
 
-            updateProgress();
+            updateStats();
         }
 
-        // --- 3. Interaction Logic ---
-        window.toggleService = function(name, element) {
-            if (learnedServices.includes(name)) {
-                learnedServices = learnedServices.filter(item => item !== name);
-                element.classList.remove('learned');
-                // GSAP Jiggle for removal
-                gsap.to(element, { x: 0, duration: 0.1, clearProps: "x" });
-            } else {
-                learnedServices.push(name);
-                element.classList.add('learned');
-                // GSAP Pop for success
-                gsap.fromTo(element, 
-                    { scale: 1 }, 
-                    { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1 }
-                );
+        // --- 4. EVENTS ---
+        app.addEventListener('click', (e) => {
+            const card = e.target.closest('.service-card');
+            if (!card) return;
+
+            if (e.target.closest('[data-action="toggle-mastery"]')) {
+                const id = card.dataset.id;
+                toggleMastery(id, card);
+                e.stopPropagation();
+                return;
             }
-            
-            localStorage.setItem('awsLearned', JSON.stringify(learnedServices));
-            updateProgress();
-        }
-
-        function updateProgress() {
-            const percentage = Math.round((learnedServices.length / totalServices) * 100);
-            
-            // GSAP Animation for progress bar
-            gsap.to(progressBar, { 
-                width: `${percentage}%`, 
-                duration: 1, 
-                ease: "elastic.out(1, 0.5)" 
-            });
-            
-            // Text count animation
-            progressText.innerText = `${percentage}% Mastery (${learnedServices.length}/${totalServices})`;
-        }
-
-        // --- 4. Initialization & Animation ---
-        render();
-
-        // Staggered Entrance Animation
-        gsap.to(".category-section", {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out"
+            toggleExpand(card);
         });
 
-        // --- 5. GUI Library (Lil-GUI) ---
+        app.addEventListener('keydown', (e) => {
+            const card = e.target.closest('.service-card');
+            if (!card) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.tagName === 'BUTTON') return;
+                e.preventDefault();
+                toggleExpand(card);
+            }
+        });
+
+        function toggleExpand(card) {
+            const state = Flip.getState(".service-card");
+            const isExpanding = !card.classList.contains('expanded');
+
+            document.querySelectorAll('.service-card.expanded').forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('expanded');
+                    c.querySelector('.expanded-content').style.display = 'none';
+                }
+            });
+
+            card.classList.toggle('expanded');
+            const content = card.querySelector('.expanded-content');
+            content.style.display = isExpanding ? 'block' : 'none';
+
+            Flip.from(state, {
+                duration: 0.4,
+                ease: "power3.inOut",
+                absolute: true,
+                onComplete: () => {
+                    if(isExpanding) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+
+        function toggleMastery(id, cardElement) {
+            if (state.learned.has(id)) {
+                state.learned.delete(id);
+                cardElement.classList.remove('learned');
+                cardElement.querySelector('.master-btn').innerHTML = 'Mark as Mastered';
+            } else {
+                state.learned.add(id);
+                cardElement.classList.add('learned');
+                cardElement.querySelector('.master-btn').innerHTML = '✓ Mastered';
+                gsap.fromTo(cardElement, {scale: 0.98}, {scale: 1, duration: 0.2, ease: "back.out(2)"});
+            }
+            localStorage.setItem('aws_saa_updated_learned', JSON.stringify([...state.learned]));
+            updateStats();
+        }
+
+        function updateStats() {
+            let totalPoints = 0;
+            let earnedPoints = 0;
+
+            awsData.forEach(cat => {
+                cat.services.forEach(srv => {
+                    const points = WEIGHTS[srv.weight] || 1;
+                    totalPoints += points;
+                    if (state.learned.has(srv.id)) earnedPoints += points;
+                });
+            });
+
+            const percentage = totalPoints === 0 ? 0 : Math.round((earnedPoints / totalPoints) * 100);
+            gsap.to(progressBar, { width: `${percentage}%`, duration: 1, ease: "power2.out" });
+            progressText.innerText = `Exam Readiness: ${percentage}%`;
+        }
+
+        // --- 5. INIT ---
+        render();
+
+        gsap.from(".category-container", {
+            y: 30, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out"
+        });
+
         const params = {
-            accentColor: '#FF9900',
-            glowIntensity: 0.3,
-            resetProgress: () => {
+            reset: () => {
                 if(confirm("Reset all progress?")) {
-                    learnedServices = [];
-                    localStorage.setItem('awsLearned', JSON.stringify([]));
+                    state.learned.clear();
+                    localStorage.removeItem('aws_saa_updated_learned');
                     render();
-                    gsap.fromTo(".service-card", {opacity: 0}, {opacity: 1, duration: 0.5, stagger: 0.01});
                 }
             }
         };
+        const gui = new lil.GUI({ title: 'Controls' });
+        gui.add(params, 'reset').name('⚠ Reset Data');
 
-        const gui = new lil.GUI({ title: 'Tracker Settings' });
-        
-        gui.addColor(params, 'accentColor')
-           .name('Theme Color')
-           .onChange(value => {
-               document.documentElement.style.setProperty('--accent-color', value);
-               // Also update the glow based on the new color
-               document.documentElement.style.setProperty('--accent-glow', `rgba(${hexToRgb(value)}, ${params.glowIntensity})`);
-           });
-
-        gui.add(params, 'glowIntensity', 0, 1)
-           .name('Glow Power')
-           .onChange(value => {
-               const color = document.documentElement.style.getPropertyValue('--accent-color');
-               document.documentElement.style.setProperty('--accent-glow', `rgba(${hexToRgb(color)}, ${value})`);
-           });
-           
-        gui.add(params, 'resetProgress').name('⚠ Reset Data');
-
-        // Helper for GUI color handling
-        function hexToRgb(hex) {
-            // Remove hash if present
-            hex = hex.replace('#', '');
-            
-            // Parse r, g, b
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
-            
-            return `${r}, ${g}, ${b}`;
-        }
     </script>
 </body>
 </html>
