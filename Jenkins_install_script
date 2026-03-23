@@ -1,65 +1,99 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-echo "==== Jenkins Docker Installation Script ===="
+echo "========================================="
+echo "   Jenkins Docker Auto Installer"
+echo "========================================="
 
-# Step 1: Install Docker if not installed
+JENKINS_NAME="jenkins"
+JENKINS_PORT=8080
+AGENT_PORT=50000
+VOLUME_NAME="jenkins_home"
 
-if ! command -v docker &> /dev/null
-then
-echo "Docker not found. Installing Docker..."
-sudo apt update
-sudo apt install -y docker.io
+# ---------- Function: Check Command ----------
+
+command_exists() {
+command -v "$1" >/dev/null 2>&1
+}
+
+# ---------- Step 1: Install Docker ----------
+
+if ! command_exists docker; then
+echo "[INFO] Docker not found. Installing..."
+sudo apt update -y
+sudo apt install -y docker.io lsof
 sudo systemctl enable docker
 sudo systemctl start docker
-sudo usermod -aG docker $USER
-echo "Docker installed successfully."
+sudo usermod -aG docker "$USER"
+echo "[INFO] Docker installed. Please re-login if permission issues occur."
 else
-echo "Docker already installed."
+echo "[INFO] Docker already installed."
 fi
 
-# Step 2: Create Jenkins volume
+# ---------- Step 2: Check Port Availability ----------
 
-echo "Creating Docker volume for Jenkins..."
-docker volume create jenkins_home || true
+if command_exists lsof && sudo lsof -i :$JENKINS_PORT >/dev/null; then
+echo "[ERROR] Port $JENKINS_PORT is already in use."
+exit 1
+fi
 
-# Step 3: Pull Jenkins image
+# ---------- Step 3: Create Volume ----------
 
-echo "Pulling Jenkins image..."
+echo "[INFO] Creating Docker volume..."
+docker volume inspect $VOLUME_NAME >/dev/null 2>&1 || docker volume create $VOLUME_NAME
+
+# ---------- Step 4: Remove Old Container ----------
+
+if docker ps -a --format '{{.Names}}' | grep -Eq "^${JENKINS_NAME}$"; then
+echo "[INFO] Removing existing Jenkins container..."
+docker rm -f $JENKINS_NAME
+fi
+
+# ---------- Step 5: Pull Latest Jenkins ----------
+
+echo "[INFO] Pulling Jenkins image..."
 docker pull jenkins/jenkins:lts
 
-# Step 4: Remove existing container if exists
+# ---------- Step 6: Run Jenkins ----------
 
-if [ "$(docker ps -aq -f name=jenkins)" ]; then
-echo "Removing existing Jenkins container..."
-docker rm -f jenkins
-fi
-
-# Step 5: Run Jenkins container
-
-echo "Starting Jenkins container..."
+echo "[INFO] Starting Jenkins container..."
 docker run -d 
---name jenkins 
--p 8080:8080 
--p 50000:50000 
--v jenkins_home:/var/jenkins_home 
+--name $JENKINS_NAME 
+-p $JENKINS_PORT:8080 
+-p $AGENT_PORT:50000 
+-v $VOLUME_NAME:/var/jenkins_home 
 -v /var/run/docker.sock:/var/run/docker.sock 
+--restart unless-stopped 
 jenkins/jenkins:lts
 
-# Step 6: Wait for Jenkins to initialize
+# ---------- Step 7: Wait for Jenkins ----------
 
-echo "Waiting for Jenkins to initialize..."
-sleep 15
+echo "[INFO] Waiting for Jenkins to initialize..."
+sleep 25
 
-# Step 7: Get initial admin password
+# ---------- Step 8: Fetch Initial Password ----------
 
-echo "Fetching Jenkins initial admin password..."
-docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword || echo "Jenkins is still starting. Try again in a few seconds."
+echo "[INFO] Fetching initial admin password..."
+if docker exec $JENKINS_NAME test -f /var/jenkins_home/secrets/initialAdminPassword; then
+docker exec $JENKINS_NAME cat /var/jenkins_home/secrets/initialAdminPassword
+else
+echo "[WARN] Jenkins still starting. Run:"
+echo "docker logs -f $JENKINS_NAME"
+fi
+
+# ---------- Final ----------
 
 echo ""
-echo "==== Jenkins Setup Complete ===="
-echo "Access Jenkins at: http://localhost:8080"
-echo "If running on server: http://<your-server-ip>:8080"
+echo "========================================="
+echo " Jenkins is starting..."
+echo " Access: [http://localhost:$JENKINS_PORT](http://localhost:$JENKINS_PORT)"
+echo "========================================="
 echo ""
-echo "NOTE: You may need to log out and log back in for Docker permissions to apply."
+echo "If on cloud (AWS/VPS), use:"
+echo "http://<your-server-ip>:$JENKINS_PORT"
+echo ""
+echo "Useful commands:"
+echo "docker logs -f $JENKINS_NAME"
+echo "docker restart $JENKINS_NAME"
+echo ""
