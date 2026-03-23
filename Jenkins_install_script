@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+
+echo "==== Jenkins Docker Installation Script ===="
+
+# Step 1: Install Docker if not installed
+
+if ! command -v docker &> /dev/null
+then
+echo "Docker not found. Installing Docker..."
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+echo "Docker installed successfully."
+else
+echo "Docker already installed."
+fi
+
+# Step 2: Create Jenkins volume
+
+echo "Creating Docker volume for Jenkins..."
+docker volume create jenkins_home || true
+
+# Step 3: Pull Jenkins image
+
+echo "Pulling Jenkins image..."
+docker pull jenkins/jenkins:lts
+
+# Step 4: Remove existing container if exists
+
+if [ "$(docker ps -aq -f name=jenkins)" ]; then
+echo "Removing existing Jenkins container..."
+docker rm -f jenkins
+fi
+
+# Step 5: Run Jenkins container
+
+echo "Starting Jenkins container..."
+docker run -d 
+--name jenkins 
+-p 8080:8080 
+-p 50000:50000 
+-v jenkins_home:/var/jenkins_home 
+-v /var/run/docker.sock:/var/run/docker.sock 
+jenkins/jenkins:lts
+
+# Step 6: Wait for Jenkins to initialize
+
+echo "Waiting for Jenkins to initialize..."
+sleep 15
+
+# Step 7: Get initial admin password
+
+echo "Fetching Jenkins initial admin password..."
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword || echo "Jenkins is still starting. Try again in a few seconds."
+
+echo ""
+echo "==== Jenkins Setup Complete ===="
+echo "Access Jenkins at: http://localhost:8080"
+echo "If running on server: http://<your-server-ip>:8080"
+echo ""
+echo "NOTE: You may need to log out and log back in for Docker permissions to apply."
