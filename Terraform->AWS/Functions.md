@@ -5,6 +5,8 @@ Terraform relies on HashiCorp Configuration Language (HCL). While it is not a ge
 
 > **Pro-Tip:** You can test any function without writing a `.tf` file by opening your terminal and typing `terraform console`.
 
+> **Difference-Tip:** In terraform file and console the difference is just format i.e `console = function(value)` in .tf file `terreform_variable "variable-name" { value = function("data") }`
+
 ---
 
 ## 1. String Functions
